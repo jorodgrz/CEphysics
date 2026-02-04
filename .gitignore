@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+*.egg-info/
+dist/
+build/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Data files (too large for git)
+grids/
+*.h5
+*.hdf5
+*.tar.gz
+archives_backup/
+
+# POSYDON source (should be cloned separately)
+POSYDON/
+
+# Results and analysis
+results/
+test_analysis/
+analysis*/
+*.png
+*.pdf
+*.csv
+
+# Configuration files with local paths
+population_params_test.ini
+
+# IDE
+.vscode/
+.idea/
+*.code-workspace
+
+# macOS
+.DS_Store
+
+# Environment
+.env
