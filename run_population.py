@@ -133,7 +133,7 @@ def evolve_binary(M1, M2, P_orb, Z, sim_prop):
 
 def extract_CE_data(binary, initial_conditions):
     """
-    Extract CE event data from evolved binary.
+    Extract CE event data from evolved binary using POSYDON history DataFrame.
     """
     ce_data = {
         'M1_initial': initial_conditions['M1'],
@@ -146,35 +146,52 @@ def extract_CE_data(binary, initial_conditions):
         'donor_state': None,
         'survived_CE': False,
         'final_state': str(binary.state) if hasattr(binary, 'state') else None,
+        'final_M1': np.nan,
+        'final_M2': np.nan,
+        'final_P': np.nan,
     }
     
-    # Check binary history for CE events
-    # This is a placeholder - actual implementation depends on POSYDON output structure
+    # Extract final state information
     try:
-        history = binary.history
-        
-        # Look for CE step in history
-        if hasattr(history, 'step_names'):
-            ce_steps = [i for i, step in enumerate(history.step_names) 
-                       if 'step_CE' in str(step)]
+        if hasattr(binary, 'star_1') and hasattr(binary.star_1, 'mass'):
+            ce_data['final_M1'] = binary.star_1.mass
+        if hasattr(binary, 'star_2') and hasattr(binary.star_2, 'mass'):
+            ce_data['final_M2'] = binary.star_2.mass
+        if hasattr(binary, 'orbital_period'):
+            ce_data['final_P'] = binary.orbital_period
+    except:
+        pass
+    
+    # Check for CE events in the binary's event history
+    try:
+        # POSYDON stores history as a pandas DataFrame accessible via to_df()
+        if hasattr(binary, 'to_df'):
+            history_df = binary.to_df()
             
-            if ce_steps:
-                ce_data['CE_occurred'] = True
-                ce_idx = ce_steps[0]
+            # Look for CE events in the 'event' column
+            if 'event' in history_df.columns:
+                ce_events = history_df[history_df['event'].str.contains('CE', na=False)]
                 
-                # Extract lambda if available
-                if hasattr(history, 'lambda_CE_1Msun'):
-                    ce_data['lambda_CE'] = history.lambda_CE_1Msun[ce_idx]
-                
-                # Extract donor state
-                if hasattr(history, 'star_1_state'):
-                    ce_data['donor_state'] = str(history.star_1_state[ce_idx])
-                
-                # Check if survived
-                ce_data['survived_CE'] = binary.state not in ['merged', 'initial_RLOF']
+                if len(ce_events) > 0:
+                    ce_data['CE_occurred'] = True
+                    
+                    # Get first CE event
+                    ce_row = ce_events.iloc[0]
+                    
+                    # Extract lambda if available
+                    if 'lambda_CE_1Msun' in history_df.columns:
+                        ce_data['lambda_CE'] = ce_row.get('lambda_CE_1Msun', np.nan)
+                    
+                    # Extract donor state before CE
+                    if 'star_1_state' in history_df.columns:
+                        ce_data['donor_state'] = str(ce_row.get('star_1_state', 'unknown'))
+                    
+                    # Check if system survived CE
+                    ce_data['survived_CE'] = binary.state not in ['merged', 'initial_RLOF', 'disrupted']
         
     except Exception as e:
-        print(f"Warning: Could not extract CE data: {e}")
+        # Silently fail - not all binaries will have CE events
+        pass
     
     return ce_data
 
