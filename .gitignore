@@ -36,6 +36,13 @@ analysis*/
 
 # Configuration files with local paths
 population_params_test.ini
+population_params.ini
+population_params_debug.ini
+
+# Old/backup files
+documentation/
+*.backup
+*_old.*
 
 # IDE
 .vscode/

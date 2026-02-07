@@ -41,15 +41,25 @@ Compare your POSYDON results to a "Fixed $\lambda$" model:
 
 **Hypothesis to test**: "I expect POSYDON to show that stars with convective envelopes have a variable $\lambda_{\text{env}}$ that fluctuates during the supergiant phase, allowing for a wider range of DNS survivors than predicted by static $\lambda = \text{const}$ models."
 
-## Project Files
+## Project Structure
 
-- **CE_research_project.ipynb** - Main Jupyter notebook for interactive analysis
-- **run_population.py** - Python script for batch processing population synthesis  
-- **analyze_results.py** - Results analysis and plotting script
-- **test_posydon_setup.py** - Verify POSYDON installation
-- **test_single_binary.py** - Test single binary evolution
-- **GETTING_STARTED.md** - Complete quick-start guide
-- **documentation/INSTALLATION.md** - POSYDON installation guide
+```
+CEphysics/
+├── README.md                    # Project overview and results
+├── RESEARCH_SUMMARY.md          # Complete research documentation
+├── Analysis.ipynb               # Interactive analysis notebook
+├── run_population.py           # Population synthesis script
+├── final_analysis.py           # Automated figure generation
+├── test_single_binary.py       # Single binary test
+├── debug_binary_history.py     # POSYDON debugging tool
+├── docs/
+│   ├── SETUP.md                # Installation guide
+│   └── USAGE.md                # How to use scripts
+└── results/
+    ├── README.md               # Results documentation
+    ├── *.png                   # Publication figures
+    └── *.csv                   # Data tables
+```
 
 ## Results
 
