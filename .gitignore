@@ -24,13 +24,15 @@ archives_backup/
 # POSYDON source (should be cloned separately)
 POSYDON/
 
-# Results and analysis
-results/
+# Results and analysis - exclude data but keep documentation
+results/*.h5
+results/*.hdf5
+results/*.csv
+results/*.png
+results/*.pdf
+!results/README.md
 test_analysis/
 analysis*/
-*.png
-*.pdf
-*.csv
 
 # Configuration files with local paths
 population_params_test.ini
