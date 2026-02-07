@@ -143,7 +143,7 @@ All simulation data available in `results/`:
 conda activate posydon
 ```
 
-### 2. Launch Jupyter Notebook
+### 2. Interactive Analysis
 
 ```bash
 jupyter notebook analysis.ipynb
