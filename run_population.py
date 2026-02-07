@@ -265,10 +265,17 @@ def run_population(binary_grid, output_file, alpha_CE=1.0, verbose=True):
         
         # Check if CE_occurred column exists and has data
         if 'CE_occurred' in results_df.columns:
-            ce_count = results_df['CE_occurred'].sum()
+            # Use == True to handle NaN values properly
+            ce_systems = results_df[results_df['CE_occurred'] == True]
+            ce_count = len(ce_systems)
             print(f"Systems with CE events: {ce_count}")
             if ce_count > 0 and 'survived_CE' in results_df.columns:
-                print(f"CE survival rate: {results_df[results_df['CE_occurred']]['survived_CE'].mean():.2%}")
+                # Filter out NaN values in survived_CE
+                valid_survival = ce_systems['survived_CE'].dropna()
+                if len(valid_survival) > 0:
+                    print(f"CE survival rate: {valid_survival.mean():.2%}")
+                else:
+                    print(f"CE survival rate: N/A (no survival data)")
         
         # Check for errors
         if 'error' in results_df.columns:
