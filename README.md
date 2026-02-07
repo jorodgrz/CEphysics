@@ -144,3 +144,40 @@ For more detailed information:
 - **[docs/USAGE.md](docs/USAGE.md)** - Complete usage instructions and command reference
 - **[results/](results/)** - All data files, figures, and analysis outputs
 
+## Citation
+
+If you use this work, please cite:
+
+```bibtex
+@article{Rodriguez2026,
+  author = {Rodriguez, Joseph},
+  title = {Metallicity Dependence of Common Envelope Evolution in Binary Stars},
+  journal = {In preparation},
+  year = {2026}
+}
+```
+
+And the POSYDON framework:
+
+```bibtex
+@article{Fragos2023,
+  author = {Fragos, T. and others},
+  title = {POSYDON: A Framework for Population Synthesis},
+  journal = {ApJS},
+  volume = {264},
+  pages = {45},
+  year = {2023}
+}
+```
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Contact
+
+**Joseph Rodriguez**  
+University of California, San Diego  
+Email: jrodriguezruelas@ucsd.edu  
+GitHub: [@jorodgrz](https://github.com/jorodgrz)
+
