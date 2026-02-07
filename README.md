@@ -46,8 +46,7 @@ Compare your POSYDON results to a "Fixed $\lambda$" model:
 ```
 CEphysics/
 ├── README.md                    # Project overview and results
-├── RESEARCH_SUMMARY.md          # Complete research documentation
-├── Analysis.ipynb               # Interactive analysis notebook
+├── analysis.ipynb               # Interactive analysis notebook
 ├── run_population.py           # Population synthesis script
 ├── final_analysis.py           # Automated figure generation
 ├── docs/
@@ -172,8 +171,7 @@ python final_analysis.py
 
 For more detailed information:
 
-- **[RESEARCH_SUMMARY.md](RESEARCH_SUMMARY.md)** - Complete research documentation, methodology, and findings
-- **[docs/SETUP.md](docs/SETUP.md)** - Detailed installation and environment setup guide
+- **[docs/SETUP.md](docs/SETUP.md)** - Installation and environment setup guide
 - **[docs/USAGE.md](docs/USAGE.md)** - Complete usage instructions and command reference
 - **[results/](results/)** - All data files, figures, and analysis outputs
 
