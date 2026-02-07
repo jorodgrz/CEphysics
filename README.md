@@ -210,8 +210,3 @@ GitHub: [@jorodgrz](https://github.com/jorodgrz)
 ## License
 
 This project is open source and available for academic use.
-
----
-
-**Status**: ✅ Research Complete - Ready for Publication  
-**Last Updated**: February 6, 2026
