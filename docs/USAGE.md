@@ -58,6 +58,8 @@ python run_population.py --metallicity 0.001 --n_systems 200 --alpha_CE 0.5 --ou
 
 ### Automated Analysis
 
+#### 1. Main Analysis (with Confidence Intervals)
+
 Generate all figures and statistics:
 
 ```bash
@@ -67,8 +69,38 @@ python final_analysis.py
 This creates in `results/`:
 - `lambda_vs_metallicity.png` - Main result figure
 - `detailed_comparison.png` - 4-panel comparison
-- `summary_statistics.csv` - Aggregate statistics
+- `summary_statistics.csv` - Aggregate statistics with 95% CIs
 - `*_results.csv` - Individual metallicity datasets
+
+#### 2. Mechanism Analysis
+
+Analyze survival probability vs lambda and evolutionary state:
+
+```bash
+python analyze_mechanisms.py
+```
+
+This creates in `results/sensitivity/`:
+- `survival_vs_lambda.png` - Survival probability by lambda bins (with CIs)
+- `survival_by_state.png` - Survival stratified by donor evolutionary state
+- `lambda_binned_survival.csv` - Binned survival data
+- `donor_state_stratified.csv` - State-specific survival rates
+
+**Key output**: Identifies λ_crit ≈ 0.04 as minimum lambda for survival.
+
+#### 3. Parameter Sensitivity Analysis
+
+Test robustness across αCE values:
+
+```bash
+python analyze_alpha_sweep.py
+```
+
+This creates in `results/sensitivity/`:
+- `survival_vs_alphaCE.png` - Survival rate vs CE efficiency parameter
+- `alpha_sweep_summary.csv` - Full parameter sweep results
+
+**Note**: Requires additional simulation runs at α=1.0 and α=2.0 for complete analysis (see Future Work in main README).
 
 ### Interactive Analysis
 

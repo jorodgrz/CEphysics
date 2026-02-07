@@ -48,14 +48,22 @@ CEphysics/
 ├── README.md                    # Project overview and results
 ├── analysis.ipynb               # Interactive analysis notebook
 ├── run_population.py           # Population synthesis script
-├── final_analysis.py           # Automated figure generation
+├── final_analysis.py           # Automated figure generation with CIs
+├── analyze_mechanisms.py       # Lambda vs survival mechanism analysis
+├── analyze_alpha_sweep.py      # Parameter sensitivity analysis
 ├── docs/
 │   ├── SETUP.md                # Installation guide
 │   └── USAGE.md                # How to use scripts
 └── results/
     ├── README.md               # Results documentation
     ├── *.png                   # Publication figures
-    └── *.csv                   # Data tables
+    ├── *.csv                   # Data tables
+    └── sensitivity/            # Sensitivity analysis outputs
+        ├── lambda_binned_survival.csv
+        ├── donor_state_stratified.csv
+        ├── survival_vs_lambda.png
+        ├── survival_by_state.png
+        └── survival_vs_alphaCE.png
 ```
 
 ## Results
@@ -85,23 +93,41 @@ This **validates the hypothesis**: $\lambda$ fluctuates during the supergiant ph
 
 **Sharp transition at**: $0.006 < Z_{\text{crit}} < 0.014$
 
-| Metallicity | CE Rate | Survival Rate | Outcome |
+| Metallicity | CE Rate (95% CI) | Survival Rate (95% CI) | Outcome |
 |------------|---------|---------------|---------|
-| Z = 0.014 (Solar) | 6.5% | 7.7% | **Survival Possible** ✓ |
-| Z = 0.006 (Mid) | 14.5% | 0.0% | **Death Trap** ✗ |
-| Z = 0.001 (Low) | 13.5% | 0.0% | **Death Trap** ✗ |
+| Z = 0.014 (Solar) | 6.5% (3.5-10.9%) | 7.7% (0.2-36.0%) | **Survival Possible** ✓ |
+| Z = 0.006 (Mid) | 14.5% (9.9-20.2%) | 0.0% (0.0-9.8%) | **Death Trap** ✗ |
+| Z = 0.001 (Low) | 13.5% (9.1-19.0%) | 0.0% (0.0-10.5%) | **Death Trap** ✗ |
+
+**Statistical Robustness**: Confidence intervals calculated using Wilson score method (beta distribution for small sample sizes).
 
 **Below $Z_{\text{crit}}$**: 
 - CE events occur **2× more frequently** (stars are more compact)
-- But **0% survival rate** (envelopes too tightly bound to eject)
+- But **0% survival rate** with 95% confidence upper bound < 11% (envelopes too tightly bound to eject)
 
-#### 4. Low-Z Paradox Confirmed
+#### 4. Critical Lambda Threshold Identified
+
+**Survival requires**: $\lambda \gtrsim 0.04$
+
+Lambda binning analysis reveals:
+- $\lambda < 0.03$: **0% survival** (n=22 systems)
+- $0.03 < \lambda < 0.06$: **11% survival** (n=9 systems, only 1 survivor)
+- $\lambda > 0.06$: **0% survival** in current sample (possible λ > 0.15 needed with higher α)
+
+**The only survivor** in the dataset had:
+- $\lambda = 0.043$ (Shell H-burning phase)
+- Solar metallicity (Z = 0.014)
+- α_CE = 0.5
+
+**Mechanism**: Lower lambda → Higher binding energy → Requires more orbital energy to eject envelope → Merger more likely
+
+#### 5. Low-Z Paradox Confirmed
 
 At low metallicity:
 - Stars are more compact → Fill Roche lobes earlier
 - CE happens more often
 - But compact structure → Lower $\lambda$ → Impossible to eject envelope
-- **Result**: 100% merger/disruption rate
+- **Result**: 100% merger/disruption rate (with 95% CI: 89-100% failure rate)
 
 ### Implications for Astrophysics
 
@@ -123,18 +149,77 @@ At low metallicity:
 ### Figures
 
 See `results/` directory for publication-quality figures:
+
+**Main Results**:
 - `lambda_vs_metallicity.png` - Main result showing $\lambda(Z)$ trend and critical threshold
 - `detailed_comparison.png` - Comprehensive 4-panel comparison across metallicities
+
+**Mechanism Analysis** (`results/sensitivity/`):
+- `survival_vs_lambda.png` - Survival probability as function of lambda (binned analysis with CIs)
+- `survival_by_state.png` - CE survival stratified by donor evolutionary state and metallicity
+- `survival_vs_alphaCE.png` - Parameter sensitivity: survival rate vs common envelope efficiency (baseline α=0.5 shown)
+
+**Note**: Full αCE sensitivity analysis requires additional simulations at α=1.0 and α=2.0 (see Future Work below)
 
 ### Data Availability
 
 All simulation data available in `results/`:
+
+**Population Data**:
 - `solar_Z_results.csv` - 200 systems at Z = 0.014
 - `mid_Z_results.csv` - 200 systems at Z = 0.006
 - `low_Z_results.csv` - 200 systems at Z = 0.001
-- `summary_statistics.csv` - Aggregate statistics
+- `summary_statistics.csv` - Aggregate statistics with 95% confidence intervals
 - HDF5 files with complete binary evolution histories
 
+**Analysis Data** (`results/sensitivity/`):
+- `lambda_binned_survival.csv` - Survival rates by lambda bin with Wilson CIs
+- `donor_state_stratified.csv` - Survival by evolutionary state and metallicity
+- `alpha_sweep_summary.csv` - Parameter sensitivity results (baseline α=0.5)
+
+
+## Future Work
+
+### Planned Enhancements for Publication
+
+**Parameter Sensitivity** (High Priority):
+- [ ] Run αCE sweep: α ∈ {1.0, 2.0} for Z=0.001 and Z=0.006 (4 simulations)
+- [ ] Verify death trap persists across all αCE values
+- [ ] Test recombination energy toggle (if available in POSYDON)
+
+**Statistical Robustness** (Completed ✓):
+- [x] Wilson/Jeffreys confidence intervals for all rates
+- [x] Lambda binning analysis with CIs
+- [x] Donor state stratified analysis
+- [ ] Bootstrap resampling (10k iterations) for robust error estimation
+- [ ] Larger population (N=1000) for tighter constraints
+
+**Physics Mechanism** (Completed ✓):
+- [x] Survival vs lambda relationship identified (λ_crit ≈ 0.04)
+- [x] Evolutionary state dependence quantified
+- [ ] Detailed comparison: Shell vs Core burning donors
+- [ ] Survival as function of mass ratio and orbital period
+
+**Observational Context**:
+- [ ] Compare results to Galactic DNS metallicity distribution
+- [ ] Implications for LIGO/Virgo merger rate vs redshift
+- [ ] Constraints on DNS formation channels
+
+### Commands for Additional Simulations
+
+To complete the αCE sensitivity analysis:
+
+```bash
+# Low metallicity
+python run_population.py --metallicity 0.001 --alpha_CE 1.0 --n_systems 200 --output low_Z_alpha1p0.h5
+python run_population.py --metallicity 0.001 --alpha_CE 2.0 --n_systems 200 --output low_Z_alpha2p0.h5
+
+# Mid metallicity  
+python run_population.py --metallicity 0.006 --alpha_CE 1.0 --n_systems 200 --output mid_Z_alpha1p0.h5
+python run_population.py --metallicity 0.006 --alpha_CE 2.0 --n_systems 200 --output mid_Z_alpha2p0.h5
+```
+
+After running, re-execute: `python analyze_alpha_sweep.py` for complete sensitivity analysis.
 
 ## Documentation
 

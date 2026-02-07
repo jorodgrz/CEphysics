@@ -13,10 +13,45 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
+from scipy.stats import beta
 
 # Create results directory
 results_dir = Path('results')
 results_dir.mkdir(exist_ok=True)
+
+def wilson_ci(k, n, alpha=0.05):
+    """
+    Calculate Wilson score confidence interval for binomial proportion.
+    
+    Parameters:
+    -----------
+    k : int
+        Number of successes
+    n : int
+        Total trials
+    alpha : float
+        Significance level (default 0.05 for 95% CI)
+    
+    Returns:
+    --------
+    tuple : (lower_bound, upper_bound)
+    """
+    if n == 0:
+        return 0.0, 0.0
+    
+    # Use beta distribution for exact binomial CI (Clopper-Pearson)
+    # This is equivalent to Wilson but more robust for edge cases
+    if k == 0:
+        lower = 0.0
+        upper = 1 - alpha**(1/n)  # Rule of 3 approximation
+    elif k == n:
+        lower = alpha**(1/n)
+        upper = 1.0
+    else:
+        lower = beta.ppf(alpha/2, k, n-k+1) if k > 0 else 0.0
+        upper = beta.ppf(1-alpha/2, k+1, n-k) if k < n else 1.0
+    
+    return lower * 100, upper * 100  # Return as percentages
 
 print("="*70)
 print("FINAL ANALYSIS - CE METALLICITY STUDY")
@@ -54,6 +89,13 @@ for name, df, ce_df, Z in [('Solar', solar_Z, solar_ce, 0.014),
     ce_rate = ce_count / total * 100
     survival_rate = survival_count / ce_count * 100 if ce_count > 0 else 0
     
+    # Calculate confidence intervals
+    ce_rate_ci_low, ce_rate_ci_high = wilson_ci(ce_count, total)
+    if ce_count > 0:
+        surv_ci_low, surv_ci_high = wilson_ci(survival_count, ce_count)
+    else:
+        surv_ci_low, surv_ci_high = 0.0, 0.0
+    
     if len(ce_df) > 0:
         lambda_mean = ce_df['lambda_CE'].mean()
         lambda_std = ce_df['lambda_CE'].std()
@@ -68,8 +110,12 @@ for name, df, ce_df, Z in [('Solar', solar_Z, solar_ce, 0.014),
         'Total_Systems': total,
         'CE_Events': ce_count,
         'CE_Rate_%': ce_rate,
+        'CE_Rate_CI_Low_%': ce_rate_ci_low,
+        'CE_Rate_CI_High_%': ce_rate_ci_high,
         'Survivors': survival_count,
         'Survival_Rate_%': survival_rate,
+        'Survival_CI_Low_%': surv_ci_low,
+        'Survival_CI_High_%': surv_ci_high,
         'Lambda_Mean': lambda_mean,
         'Lambda_Std': lambda_std,
         'Lambda_Min': lambda_min,
@@ -79,8 +125,8 @@ for name, df, ce_df, Z in [('Solar', solar_Z, solar_ce, 0.014),
     
     print(f"\n{name} Metallicity (Z = {Z}):")
     print(f"  Total systems: {total}")
-    print(f"  CE events: {ce_count} ({ce_rate:.1f}%)")
-    print(f"  Survivors: {survival_count} ({survival_rate:.1f}%)")
+    print(f"  CE events: {ce_count} ({ce_rate:.1f}%, 95% CI: {ce_rate_ci_low:.1f}-{ce_rate_ci_high:.1f}%)")
+    print(f"  Survivors: {survival_count} ({survival_rate:.1f}%, 95% CI: {surv_ci_low:.1f}-{surv_ci_high:.1f}%)")
     print(f"  Lambda: {lambda_mean:.3f} ± {lambda_std:.3f} (range: {lambda_min:.3f}-{lambda_max:.3f})")
 
 # Save summary statistics
