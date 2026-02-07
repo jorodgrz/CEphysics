@@ -13,10 +13,14 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 from tqdm import tqdm
+import os
+import shutil
 import posydon
+from posydon.config import PATH_TO_POSYDON
+from posydon.popsyn.io import simprop_kwargs_from_ini
 from posydon.binary_evol.simulationproperties import SimulationProperties
+from posydon.binary_evol.singlestar import SingleStar
 from posydon.binary_evol.binarystar import BinaryStar
-from posydon.binary_evol.flow_chart import flow_chart
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -73,32 +77,56 @@ def create_binary_grid(M1_range, M2_range, P_range, metallicities, n_samples=Non
 
 def setup_simulation_properties(metallicity=0.014, alpha_CE=1.0):
     """
-    Configure POSYDON simulation properties.
+    Configure POSYDON simulation properties using ini file.
     """
-    sim_prop = SimulationProperties(
-        flow_chart=flow_chart,
-        common_envelope_alpha_thermal=alpha_CE,
-        common_envelope_option_for_lambda='lambda_from_grid_final_values',
-        common_envelope_lambda_default=0.5,
-        metallicity=metallicity,
-        max_simulation_time=13.8e9,
-    )
+    # Copy default population params
+    path_to_params = os.path.join(PATH_TO_POSYDON, "posydon/popsyn/population_params_default.ini")
+    
+    # Create local copy if it doesn't exist
+    if not os.path.exists('./population_params.ini'):
+        shutil.copyfile(path_to_params, './population_params.ini')
+    
+    # Load simulation properties from ini file
+    sim_kwargs = simprop_kwargs_from_ini('population_params.ini')
+    
+    # Set metallicity for MESA grid steps (normalized to solar)
+    metallicity_dict = {'metallicity': metallicity / 0.014}
+    
+    # Only add to steps that use MESA grids
+    mesa_steps = ['step_HMS_HMS', 'step_CO_HeMS', 'step_CO_HMS_RLO', 'step_CO_HeMS_RLO']
+    
+    for step_name in mesa_steps:
+        if step_name in sim_kwargs and len(sim_kwargs[step_name]) > 1:
+            if isinstance(sim_kwargs[step_name][1], dict):
+                sim_kwargs[step_name][1].update(metallicity_dict)
+    
+    # Create simulation properties
+    sim_prop = SimulationProperties(**sim_kwargs)
+    
     return sim_prop
 
 
 def evolve_binary(M1, M2, P_orb, Z, sim_prop):
     """
-    Evolve a single binary system.
+    Evolve a single binary system using correct POSYDON API.
     """
-    sim_prop.metallicity = Z
+    # Create single stars
+    star1 = SingleStar(mass=M1, state='H-rich_Core_H_burning')
+    star2 = SingleStar(mass=M2, state='H-rich_Core_H_burning')
     
-    binary = BinaryStar.from_run(
-        m1=M1,
-        m2=M2,
-        period_days=P_orb,
+    # Create binary
+    binary = BinaryStar(
+        star1, star2,
+        time=0.0,
+        state='detached',
+        event='ZAMS',
+        orbital_period=P_orb,
         eccentricity=0.0,
-        **sim_prop.__dict__
+        properties=sim_prop
     )
+    
+    # Evolve the binary
+    binary.evolve()
     
     return binary
 
@@ -167,7 +195,20 @@ def run_population(binary_grid, output_file, alpha_CE=1.0, verbose=True):
         Print progress
     """
     results = []
+    
+    # Setup simulation properties (do this once)
+    if verbose:
+        print("Loading simulation properties and POSYDON grids...")
+        print("(This takes 2-5 minutes on first run)\n")
+    
     sim_prop = setup_simulation_properties(alpha_CE=alpha_CE)
+    
+    # Load steps once (not per binary!)
+    if verbose:
+        print("Loading POSYDON steps...")
+    sim_prop.load_steps(verbose=verbose)
+    if verbose:
+        print("✅ Steps loaded! Starting evolution...\n")
     
     iterator = tqdm(binary_grid.iterrows(), total=len(binary_grid)) if verbose else binary_grid.iterrows()
     
@@ -204,9 +245,20 @@ def run_population(binary_grid, output_file, alpha_CE=1.0, verbose=True):
     if verbose:
         print(f"\nResults saved to {output_file}")
         print(f"Total systems evolved: {len(results_df)}")
-        print(f"Systems with CE events: {results_df['CE_occurred'].sum()}")
-        if results_df['CE_occurred'].sum() > 0:
-            print(f"CE survival rate: {results_df[results_df['CE_occurred']]['survived_CE'].mean():.2%}")
+        
+        # Check if CE_occurred column exists and has data
+        if 'CE_occurred' in results_df.columns:
+            ce_count = results_df['CE_occurred'].sum()
+            print(f"Systems with CE events: {ce_count}")
+            if ce_count > 0 and 'survived_CE' in results_df.columns:
+                print(f"CE survival rate: {results_df[results_df['CE_occurred']]['survived_CE'].mean():.2%}")
+        
+        # Check for errors
+        if 'error' in results_df.columns:
+            error_count = results_df['error'].notna().sum()
+            if error_count > 0:
+                print(f"⚠ Systems with errors: {error_count}")
+                print(f"  Sample error: {results_df[results_df['error'].notna()]['error'].iloc[0]}")
     
     return results_df
 

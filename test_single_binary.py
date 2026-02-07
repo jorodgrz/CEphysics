@@ -65,12 +65,15 @@ try:
     # Load simulation properties from ini file
     sim_kwargs = simprop_kwargs_from_ini('population_params_test.ini')
     
-    # Set metallicity for all steps
+    # Set metallicity only for MESA grid steps (NOT for SN, CE, etc.)
     metallicity_dict = {'metallicity': Z / 0.014}  # Normalized to solar
     
-    for step_name in sim_kwargs.keys():
-        if step_name.startswith('step_'):
-            if len(sim_kwargs[step_name]) > 1 and isinstance(sim_kwargs[step_name][1], dict):
+    # Only these steps need metallicity
+    mesa_steps = ['step_HMS_HMS', 'step_CO_HeMS', 'step_CO_HMS_RLO', 'step_CO_HeMS_RLO']
+    
+    for step_name in mesa_steps:
+        if step_name in sim_kwargs and len(sim_kwargs[step_name]) > 1:
+            if isinstance(sim_kwargs[step_name][1], dict):
                 sim_kwargs[step_name][1].update(metallicity_dict)
     
     sim_prop = SimulationProperties(**sim_kwargs)
