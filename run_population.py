@@ -178,13 +178,17 @@ def extract_CE_data(binary, initial_conditions):
                     # Get first CE event
                     ce_row = ce_events.iloc[0]
                     
-                    # Extract lambda if available
-                    if 'lambda_CE_1Msun' in history_df.columns:
-                        ce_data['lambda_CE'] = ce_row.get('lambda_CE_1Msun', np.nan)
+                    # Extract lambda from primary star (use 10cent as standard)
+                    # Lambda columns: S1_lambda_CE_1cent, S1_lambda_CE_10cent, S1_lambda_CE_30cent
+                    if 'S1_lambda_CE_10cent' in history_df.columns:
+                        lambda_val = ce_row.get('S1_lambda_CE_10cent', np.nan)
+                        if not np.isnan(lambda_val):
+                            ce_data['lambda_CE'] = lambda_val
                     
-                    # Extract donor state before CE
-                    if 'star_1_state' in history_df.columns:
-                        ce_data['donor_state'] = str(ce_row.get('star_1_state', 'unknown'))
+                    # Extract donor state (which star overflowed first)
+                    # Typically star_1 is the donor in first CE
+                    if 'S1_state' in history_df.columns:
+                        ce_data['donor_state'] = str(ce_row.get('S1_state', 'unknown'))
                     
                     # Check if system survived CE
                     ce_data['survived_CE'] = binary.state not in ['merged', 'initial_RLOF', 'disrupted']
