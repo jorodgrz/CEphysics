@@ -62,10 +62,9 @@ source ~/.bashrc  # or source ~/.zshrc
 ```bash
 conda activate posydon
 python -c "import posydon; print('POSYDON version:', posydon.__version__)"
-python test_posydon_setup.py
 ```
 
-Should output: `✅ ALL TESTS PASSED!`
+Should output the POSYDON version number.
 
 ## HPC Setup (UCSD JupyterHub)
 

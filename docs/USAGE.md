@@ -10,14 +10,10 @@ conda activate posydon
 cd ~/CEphysics/CEphysics
 ```
 
-### 2. Test Setup
+### 2. Run Population Synthesis
+Start with a small test run:
 ```bash
-python test_posydon_setup.py
-```
-
-### 3. Test Single Binary
-```bash
-python test_single_binary.py
+python run_population.py --n_systems 10 --output test.h5
 ```
 
 ## Running Population Synthesis
@@ -164,25 +160,19 @@ df = pd.read_hdf('results.h5', 'results')
 df.to_csv('results.csv', index=False)
 ```
 
-## Debugging Tools
+## Debugging
 
-### Debug Binary History
-
-Inspect what data POSYDON stores:
+If you encounter issues, use the interactive notebook to test individual components:
 
 ```bash
-python debug_binary_history.py
+jupyter notebook Analysis.ipynb
 ```
 
-### Test Single System
-
-Test evolution of a specific binary:
-
-```bash
-python test_single_binary.py
-```
-
-Edit the script to change initial parameters.
+The notebook allows you to:
+- Test single binary evolution
+- Inspect POSYDON history structure
+- Debug parameter settings
+- Visualize results interactively
 
 ## Performance Tips
 
