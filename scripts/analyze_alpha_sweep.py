@@ -58,17 +58,17 @@ def wilson_ci(k, n, alpha=0.05):
 # Define expected data files
 data_files = [
     # Solar metallicity (only α=0.5 available)
-    {'file': 'ce_fixed_lambda.h5', 'Z': 0.014, 'Z_label': 'Solar', 'alpha': 0.5, 'required': True},
+    {'file': 'data/ce_fixed_lambda.h5', 'Z': 0.014, 'Z_label': 'Solar', 'alpha': 0.5, 'required': True},
     
     # Mid metallicity
-    {'file': 'mid_Z_lambda.h5', 'Z': 0.006, 'Z_label': 'Mid', 'alpha': 0.5, 'required': True},
-    {'file': 'mid_Z_alpha1p0.h5', 'Z': 0.006, 'Z_label': 'Mid', 'alpha': 1.0, 'required': False},
-    {'file': 'mid_Z_alpha2p0.h5', 'Z': 0.006, 'Z_label': 'Mid', 'alpha': 2.0, 'required': False},
+    {'file': 'data/mid_Z_lambda.h5', 'Z': 0.006, 'Z_label': 'Mid', 'alpha': 0.5, 'required': True},
+    {'file': 'data/mid_Z_alpha1p0.h5', 'Z': 0.006, 'Z_label': 'Mid', 'alpha': 1.0, 'required': False},
+    {'file': 'data/mid_Z_alpha2p0.h5', 'Z': 0.006, 'Z_label': 'Mid', 'alpha': 2.0, 'required': False},
     
     # Low metallicity
-    {'file': 'low_Z_lambda.h5', 'Z': 0.001, 'Z_label': 'Low', 'alpha': 0.5, 'required': True},
-    {'file': 'low_Z_alpha1p0.h5', 'Z': 0.001, 'Z_label': 'Low', 'alpha': 1.0, 'required': False},
-    {'file': 'low_Z_alpha2p0.h5', 'Z': 0.001, 'Z_label': 'Low', 'alpha': 2.0, 'required': False},
+    {'file': 'data/low_Z_lambda.h5', 'Z': 0.001, 'Z_label': 'Low', 'alpha': 0.5, 'required': True},
+    {'file': 'data/low_Z_alpha1p0.h5', 'Z': 0.001, 'Z_label': 'Low', 'alpha': 1.0, 'required': False},
+    {'file': 'data/low_Z_alpha2p0.h5', 'Z': 0.001, 'Z_label': 'Low', 'alpha': 2.0, 'required': False},
 ]
 
 # Load available datasets

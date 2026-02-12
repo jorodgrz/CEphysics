@@ -45,26 +45,59 @@ Compare your POSYDON results to a "Fixed $\lambda$" model:
 
 ```
 CEphysics/
-├── README.md                    # Project overview and results
-├── analysis.ipynb               # Interactive analysis notebook
-├── run_population.py           # Population synthesis script
-├── final_analysis.py           # Automated figure generation with CIs
-├── analyze_mechanisms.py       # Lambda vs survival mechanism analysis
-├── analyze_alpha_sweep.py      # Parameter sensitivity analysis
-├── docs/
-│   ├── SETUP.md                # Installation guide
-│   └── USAGE.md                # How to use scripts
-└── results/
-    ├── README.md               # Results documentation
-    ├── *.png                   # Publication figures
-    ├── *.csv                   # Data tables
-    └── sensitivity/            # Sensitivity analysis outputs
-        ├── lambda_binned_survival.csv
-        ├── donor_state_stratified.csv
-        ├── survival_vs_lambda.png
-        ├── survival_by_state.png
-        └── survival_vs_alphaCE.png
+├── 📄 README.md                    # Project overview and results
+├── 📄 LICENSE                      # MIT License
+├── 📄 PROJECT_STRUCTURE.md         # Detailed structure documentation
+├── 📓 analysis.ipynb               # Interactive exploration notebook
+│
+├── 📁 scripts/                     # Python analysis scripts
+│   ├── run_population.py           # Core POSYDON simulation engine
+│   ├── alpha_sweep.py              # Unified α sweep runner
+│   ├── analyze_alpha_sweep.py      # Alpha sweep analysis
+│   ├── bootstrap_analysis.py       # Statistical robustness (10k iterations)
+│   ├── physics_analysis.py         # Detailed mechanism study
+│   └── observational_comparison.py # LIGO/Virgo & DNS comparison
+│
+├── 📁 data/                        # Simulation data (HDF5 files)
+│   ├── ce_fixed_lambda.h5          # Solar Z (0.014), α=0.5
+│   ├── mid_Z_lambda.h5             # Mid Z (0.006), α=0.5
+│   ├── low_Z_lambda.h5             # Low Z (0.001), α=0.5
+│   └── *_alpha*.h5                 # Alpha sweep outputs
+│
+├── 📁 results/                     # Analysis outputs
+│   ├── README.md                   # Results documentation
+│   ├── summary_statistics.csv      # Overall summary
+│   ├── lambda_vs_metallicity.png   # Main figure
+│   ├── detailed_comparison.png     # Detailed figure
+│   │
+│   ├── 📁 bootstrap/               # Bootstrap resampling
+│   │   ├── *_bootstrap.csv         # Bootstrap CIs
+│   │   └── bootstrap_analysis.png
+│   │
+│   ├── 📁 physics/                 # Physics mechanisms
+│   │   ├── shell_vs_core_analysis.csv
+│   │   ├── survival_vs_*.csv
+│   │   └── *.png
+│   │
+│   ├── 📁 observational/           # Observational context
+│   │   ├── galactic_dns_metallicities.csv
+│   │   └── observational_comparison.png
+│   │
+│   └── 📁 sensitivity/             # Sensitivity analysis
+│       ├── alpha_sweep_summary.csv
+│       └── *.png
+│
+├── 📁 docs/                        # Documentation
+│   ├── SETUP.md                    # Installation guide
+│   ├── USAGE.md                    # Usage instructions
+│   ├── ANALYSIS_GUIDE.md           # Complete pipeline guide
+│   └── *_SUMMARY.md                # Additional docs
+│
+└── 📁 POSYDON/                     # POSYDON framework
+    └── ...
 ```
+
+> 📖 See [`PROJECT_STRUCTURE.md`](PROJECT_STRUCTURE.md) for detailed documentation
 
 ## Results
 
@@ -178,48 +211,112 @@ All simulation data available in `results/`:
 - `alpha_sweep_summary.csv` - Parameter sensitivity results (baseline α=0.5)
 
 
-## Future Work
+## Advanced Analysis Scripts
 
-### Planned Enhancements for Publication
+### Modular Analysis Pipeline
 
-**Parameter Sensitivity** (High Priority):
-- [ ] Run αCE sweep: α ∈ {1.0, 2.0} for Z=0.001 and Z=0.006 (4 simulations)
-- [ ] Verify death trap persists across all αCE values
-- [ ] Test recombination energy toggle (if available in POSYDON)
+The project now includes comprehensive modular scripts for publication-ready analysis:
 
-**Statistical Robustness** (Completed ✓):
+#### 1. **Alpha Sweep** (`scripts/alpha_sweep.py`)
+Unified simulation runner with checkpointing and error recovery:
+```bash
+python scripts/alpha_sweep.py                    # Run all α sweep simulations
+python scripts/alpha_sweep.py --resume           # Resume from checkpoint
+python scripts/alpha_sweep.py --analyze          # Run simulations + analysis
+python scripts/alpha_sweep.py --analyze-only     # Skip sims, just analyze
+python scripts/alpha_sweep.py --dry-run          # See what would run
+```
+
+**Features:**
+- Automatic checkpointing (skip completed sims)
+- Error recovery (continue on failure)
+- Progress tracking with detailed logs
+- HDF5 file validation
+- ~6-8 hours runtime for 4 simulations
+
+#### 2. **Bootstrap Analysis** (`scripts/bootstrap_analysis.py`)
+Robust statistical uncertainty estimation:
+```bash
+python scripts/bootstrap_analysis.py             # 10k iterations (default)
+python scripts/bootstrap_analysis.py --n_boot 20000  # More precise
+```
+
+**Outputs:**
+- Non-parametric confidence intervals
+- CE occurrence rates with bootstrap CIs
+- Survival rates with bootstrap CIs
+- Lambda distributions with uncertainties
+- Survival vs lambda (binned) analysis
+
+#### 3. **Physics Analysis** (`scripts/physics_analysis.py`)
+Detailed mechanism investigation:
+```bash
+python scripts/physics_analysis.py               # Baseline analysis
+python scripts/physics_analysis.py --include-alpha  # Include α sweep data
+```
+
+**Analyses:**
+- Shell vs Core burning donor comparison
+- Survival as function of mass ratio q = M₂/M₁
+- Survival as function of orbital period
+- 2D survival maps: f(q, P)
+- Lambda by donor evolutionary state
+- Binding energy correlations
+
+#### 4. **Observational Comparison** (`scripts/observational_comparison.py`)
+Astrophysical context and constraints:
+```bash
+python scripts/observational_comparison.py       # Full comparison
+python scripts/observational_comparison.py --verbose  # Detailed output
+```
+
+**Includes:**
+- Galactic DNS metallicity distribution (7 systems)
+- LIGO/Virgo merger rate implications
+- Cosmic star formation history integration
+- DNS formation channel constraints
+- Redshift-dependent metallicity evolution
+
+### Quick Start for Complete Analysis
+
+```bash
+# Run from project root (CEphysics/)
+
+# 1. Run alpha sweep simulations (6-8 hours)
+python scripts/alpha_sweep.py --yes --analyze
+
+# 2. Bootstrap resampling for robust uncertainties
+python scripts/bootstrap_analysis.py
+
+# 3. Detailed physics mechanisms
+python scripts/physics_analysis.py --include-alpha
+
+# 4. Observational comparison
+python scripts/observational_comparison.py
+```
+
+## Analysis Status
+
+### Completed ✓
 - [x] Wilson/Jeffreys confidence intervals for all rates
 - [x] Lambda binning analysis with CIs
 - [x] Donor state stratified analysis
-- [ ] Bootstrap resampling (10k iterations) for robust error estimation
-- [ ] Larger population (N=1000) for tighter constraints
-
-**Physics Mechanism** (Completed ✓):
 - [x] Survival vs lambda relationship identified (λ_crit ≈ 0.04)
 - [x] Evolutionary state dependence quantified
-- [ ] Detailed comparison: Shell vs Core burning donors
-- [ ] Survival as function of mass ratio and orbital period
+- [x] Modular analysis pipeline created
 
-**Observational Context**:
-- [ ] Compare results to Galactic DNS metallicity distribution
-- [ ] Implications for LIGO/Virgo merger rate vs redshift
-- [ ] Constraints on DNS formation channels
+### Ready to Run
+- [ ] Alpha CE sweep: α ∈ {1.0, 2.0} for Z=0.001 and Z=0.006 (scripts ready)
+- [ ] Bootstrap resampling (10k iterations) - script ready
+- [ ] Shell vs Core burning comparison - script ready
+- [ ] Mass ratio and period dependence - script ready
+- [ ] Galactic DNS comparison - script ready
+- [ ] LIGO/Virgo implications - script ready
 
-### Commands for Additional Simulations
-
-To complete the αCE sensitivity analysis:
-
-```bash
-# Low metallicity
-python run_population.py --metallicity 0.001 --alpha_CE 1.0 --n_systems 200 --output low_Z_alpha1p0.h5
-python run_population.py --metallicity 0.001 --alpha_CE 2.0 --n_systems 200 --output low_Z_alpha2p0.h5
-
-# Mid metallicity  
-python run_population.py --metallicity 0.006 --alpha_CE 1.0 --n_systems 200 --output mid_Z_alpha1p0.h5
-python run_population.py --metallicity 0.006 --alpha_CE 2.0 --n_systems 200 --output mid_Z_alpha2p0.h5
-```
-
-After running, re-execute: `python analyze_alpha_sweep.py` for complete sensitivity analysis.
+### Future Extensions
+- [ ] Test recombination energy toggle (if available in POSYDON)
+- [ ] Larger population (N=1000) for tighter constraints
+- [ ] Triple interaction channel comparison
 
 ## Documentation
 
