@@ -1,0 +1,19 @@
+# Core scientific computing
+pandas>=1.5.0
+numpy>=1.23.0
+matplotlib>=3.5.0
+scipy>=1.9.0
+
+# Data handling
+h5py>=3.7.0
+tables>=3.8.0
+
+# Progress bars and utilities
+tqdm>=4.64.0
+
+# POSYDON (install separately with: pip install -e .)
+# posydon
+
+# Optional but recommended
+jupyter>=1.0.0
+ipykernel>=6.15.0
